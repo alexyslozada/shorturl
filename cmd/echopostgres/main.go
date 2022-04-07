@@ -3,8 +3,10 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
@@ -25,6 +27,7 @@ func main() {
 	}()
 
 	e := getEcho()
+	e.GET("/health", health)
 	dbPool := getPostgres()
 
 	router.Start(e, dbPool, logger.Sugar())
@@ -102,4 +105,8 @@ func getLog() *zap.Logger {
 	}
 
 	return logger
+}
+
+func health(c echo.Context) error {
+	return c.JSON(http.StatusOK, map[string]time.Time{"data": time.Now()})
 }

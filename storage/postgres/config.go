@@ -17,20 +17,17 @@ const (
 )
 
 func New(user, pass, host, port, dbName, sslMode string, minConns, maxConns int32) (*pgxpool.Pool, error) {
-	connString := makeURL(user, pass, host, port, dbName, sslMode)
+	if minConns > 0 && minConns < MinConns {
+		minConns = MinConns
+	}
+	if maxConns > 0 && maxConns > MaxConns {
+		maxConns = MaxConns
+	}
+
+	connString := makeURL(user, pass, host, port, dbName, sslMode, minConns, maxConns)
 	config, err := pgxpool.ParseConfig(connString)
 	if err != nil {
 		return nil, err
-	}
-
-	config.MinConns = MinConns
-	if minConns > 0 && minConns < MinConns {
-		config.MinConns = minConns
-	}
-
-	config.MaxConns = MaxConns
-	if maxConns > 0 && maxConns < MaxConns {
-		config.MaxConns = maxConns
 	}
 
 	config.ConnConfig.RuntimeParams["application_name"] = AppName
@@ -43,6 +40,15 @@ func New(user, pass, host, port, dbName, sslMode string, minConns, maxConns int3
 	return pool, err
 }
 
-func makeURL(user, pass, host, port, dbName, sslMode string) string {
-	return fmt.Sprintf("%s:%s@%s:%s/%s?sslmode=%s", user, pass, host, port, dbName, sslMode)
+func makeURL(user, pass, host, port, dbName, sslMode string, minConns, maxConns int32) string {
+	return fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=%s pool_min_conns=%d pool_max_conns=%d",
+		user,
+		pass,
+		host,
+		port,
+		dbName,
+		sslMode,
+		minConns,
+		maxConns,
+	)
 }
