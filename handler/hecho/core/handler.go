@@ -29,7 +29,7 @@ func (h handler) Redirect(c echo.Context) error {
 	short := c.Param("short")
 	shortURL, err := h.useCaseShortURL.ByShort(short)
 	if err != nil {
-		h.logger.Errorw("can't get short by short url", "func", "Redirect", "internal", err)
+		h.logger.Errorw("can't get short by short url", "func", "Redirect", "short", short, "internal", err)
 		// We will return no content for this handler b/c this is used by a final client
 		return c.JSON(http.StatusNoContent, "this url is not found")
 	}

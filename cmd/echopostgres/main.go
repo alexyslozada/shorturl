@@ -28,11 +28,17 @@ func main() {
 
 	e := getEcho()
 	e.GET("/health", health)
+
 	dbPool := getPostgres()
+	err := postgres.Migrate(dbPool)
+	if err != nil {
+		log.Println("Error: couldn't migrate database", err)
+		os.Exit(1)
+	}
 
 	router.Start(e, dbPool, logger.Sugar())
 
-	err := e.Start(":" + os.Getenv("HTTP_PORT"))
+	err = e.Start(":" + os.Getenv("HTTP_PORT"))
 	if err != nil {
 		log.Println("Error: Couldn't start the server", err)
 		os.Exit(1)
