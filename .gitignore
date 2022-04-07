@@ -11,7 +11,7 @@
 *.dll
 *.so
 *.dylib
-shorturl
+short
 
 # Environments
 .env
