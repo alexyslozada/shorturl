@@ -30,6 +30,8 @@ func main() {
 	e.GET("/health", health)
 
 	dbPool := getPostgres()
+	defer dbPool.Close()
+
 	err := postgres.Migrate(dbPool)
 	if err != nil {
 		log.Println("Error: couldn't migrate database", err)
