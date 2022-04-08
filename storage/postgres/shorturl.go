@@ -15,14 +15,14 @@ const (
 )
 
 const (
-	sqlShortURLInsert = `INSERT INTO ` + shortURLTable + ` (id, short, redirect_to, created_at) 
-				VALUES ($1, $2, $3, $4)`
+	sqlShortURLInsert = `INSERT INTO ` + shortURLTable + ` (id, short, redirect_to, description, created_at) 
+				VALUES ($1, $2, $3, $4, $5)`
 	sqlShortURLUpdate = `UPDATE ` + shortURLTable + `
-				SET short = $1, redirect_to = $2, updated_at = $3
-				WHERE id = $4`
+				SET short = $1, redirect_to = $2, description = $3, updated_at = $4
+				WHERE id = $5`
 	sqlShortURLIncrement    = `UPDATE ` + shortURLTable + ` SET times = times + 1 WHERE id = $1`
 	sqlShortURLDelete       = `DELETE FROM ` + shortURLTable + ` WHERE id = $1`
-	sqlShortURLQuery        = `SELECT id, short, redirect_to, times, created_at, updated_at FROM ` + shortURLTable
+	sqlShortURLQuery        = `SELECT id, short, redirect_to, description, times, created_at, updated_at FROM ` + shortURLTable
 	sqlShortURLQueryByShort = sqlShortURLQuery + ` WHERE short = $1`
 )
 
@@ -41,6 +41,7 @@ func (s ShortURL) Create(m *model.ShortURL) error {
 		m.ID,
 		m.Short,
 		m.RedirectTo,
+		m.Description,
 		m.CreatedAt,
 	)
 
@@ -53,6 +54,7 @@ func (s ShortURL) Update(m *model.ShortURL) error {
 		sqlShortURLUpdate,
 		m.Short,
 		m.RedirectTo,
+		m.Description,
 		m.UpdatedAt,
 		m.ID,
 	)
@@ -121,6 +123,7 @@ func (s ShortURL) scan(row pgx.Row) (model.ShortURL, error) {
 		&m.ID,
 		&m.Short,
 		&m.RedirectTo,
+		&m.Description,
 		&m.Times,
 		&m.CreatedAt,
 		&m.UpdatedAt,

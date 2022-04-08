@@ -36,6 +36,7 @@ func createShortURL(db *pgxpool.Pool) error {
 			id UUID NOT NULL,
 			short VARCHAR(200) NOT NULL,
 			redirect_to VARCHAR(1024) NOT NULL,
+			description VARCHAR(1024),
 			times INTEGER NOT NULL DEFAULT 0,
 			created_at BIGINT NOT NULL DEFAULT 0,
 			updated_at BIGINT,
