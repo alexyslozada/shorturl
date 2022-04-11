@@ -1,6 +1,8 @@
 package shorturl
 
 import (
+	"errors"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 
@@ -9,14 +11,20 @@ import (
 
 const (
 	MaxLetters = 7
+
+	HTTPProtocol = "http"
 )
 
 var (
 	allowedLetters = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 
+var (
+	ErrWrongRedirect = errors.New("the m.Redirect has not a valid protocol")
+)
+
 type UseCase interface {
-	Create(s *model.ShortURL, isRandom bool, short string) error
+	Create(s *model.ShortURLRequest) error
 	Update(s *model.ShortURL) error
 	Delete(ID uuid.UUID) error
 	ByShort(shortURL string) (model.ShortURL, error)

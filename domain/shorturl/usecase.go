@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -40,17 +41,24 @@ func (s ShortURL) hasUseCaseDB() bool {
 	return s.useCaseDB != nil
 }
 
-func (s ShortURL) Create(m *model.ShortURL, isRandom bool, short string) error {
-	m.ID = uuid.New()
-	m.CreatedAt = time.Now().Unix()
-
-	if isRandom {
-		m.Short = randomPATH()
-	} else {
-		m.Short = short
+func (s ShortURL) Create(m *model.ShortURLRequest) error {
+	if !strings.Contains(m.RedirectTo, HTTPProtocol) {
+		return ErrWrongRedirect
 	}
 
-	return s.storage.Create(m)
+	short := model.ShortURL{
+		ID:          uuid.New(),
+		Short:       m.Short,
+		RedirectTo:  m.RedirectTo,
+		Description: m.Description,
+		CreatedAt:   time.Now().Unix(),
+	}
+
+	if m.IsRandom {
+		m.Short = randomPATH()
+	}
+
+	return s.storage.Create(&short)
 }
 
 func (s ShortURL) Update(m *model.ShortURL) error {
