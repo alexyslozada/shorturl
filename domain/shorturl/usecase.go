@@ -40,10 +40,6 @@ func (s ShortURL) hasUseCaseDB() bool {
 	return s.useCaseDB != nil
 }
 
-func New(s Storage) ShortURL {
-	return ShortURL{storage: s}
-}
-
 func (s ShortURL) Create(m *model.ShortURL, isRandom bool, short string) error {
 	m.ID = uuid.New()
 	m.CreatedAt = time.Now().Unix()

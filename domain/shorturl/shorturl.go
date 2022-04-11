@@ -16,7 +16,7 @@ var (
 )
 
 type UseCase interface {
-	Create(s *model.ShortURL) error
+	Create(s *model.ShortURL, isRandom bool, short string) error
 	Update(s *model.ShortURL) error
 	Delete(ID uuid.UUID) error
 	ByShort(shortURL string) (model.ShortURL, error)
