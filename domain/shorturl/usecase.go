@@ -126,15 +126,15 @@ func (s ShortURL) createHistoryAndIncrementTimes(shortURL model.ShortURL) error 
 
 	m := model.History{ShortURLID: shortURL.ID}
 	if err := s.useCaseHistory.CreateWithTx(tx, &m); err != nil {
-		return fmt.Errorf("h.storage.CreateWithTx(): %v", err)
+		return fmt.Errorf("h.storage.CreateWithTx(): %w", err)
 	}
 
 	if err := s.IncrementTimes(tx, m.ShortURLID); err != nil {
-		return fmt.Errorf("h.shortURL.IncrementTimes(): %v", err)
+		return fmt.Errorf("h.shortURL.IncrementTimes(): %w", err)
 	}
 
 	if err := tx.Commit(context.TODO()); err != nil {
-		return fmt.Errorf("c.tx.Commit(): %v", err)
+		return fmt.Errorf("c.tx.Commit(): %w", err)
 	}
 
 	return nil

@@ -23,7 +23,7 @@ func (h History) CreateWithTx(tx pgx.Tx, m *model.History) error {
 	m.CreatedAt = time.Now().Unix()
 
 	if err := h.storage.CreateWithTx(tx, m); err != nil {
-		return fmt.Errorf("h.storage.CreateWithTx(): %v", err)
+		return fmt.Errorf("h.storage.CreateWithTx(): %w", err)
 	}
 
 	return nil
