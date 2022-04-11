@@ -27,17 +27,18 @@ func Start(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
 	userRouter(e, db, l)
 }
 
-func shortURLUseCase(db *pgxpool.Pool) shorturl.ShortURL {
+func shortURLUseCase(db *pgxpool.Pool, l *zap.SugaredLogger) shorturl.ShortURL {
 	storage := postgres.NewShortURL(db)
-	return shorturl.New(storage)
+	useCase := shorturl.New(storage, l)
+	useCase.SetUseCaseDB(dbutil.New(db))
+	useCase.SetUseCaseHistory(history.New(postgres.NewHistory(db)))
+
+	return useCase
 }
 
 func historyUseCase(db *pgxpool.Pool) history.UseCase {
-	shortURLUC := shortURLUseCase(db)
 	storage := postgres.NewHistory(db)
-
-	useCase := history.New(storage, shortURLUC)
-	useCase.SetUseCaseDB(dbutil.New(db))
+	useCase := history.New(storage)
 
 	return useCase
 }
@@ -49,7 +50,7 @@ func userRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
 }
 
 func shortURLRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
-	useCase := shortURLUseCase(db)
+	useCase := shortURLUseCase(db, l)
 	routerShortURL.NewRouter(e, useCase, l)
 }
 
@@ -59,7 +60,7 @@ func historyRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
 }
 
 func redirectRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
-	shortURLUC := shortURLUseCase(db)
+	shortURLUC := shortURLUseCase(db, l)
 	historyUC := historyUseCase(db)
 	routerCore.NewRouter(e, shortURLUC, historyUC, l)
 }
