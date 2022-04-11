@@ -1,8 +1,6 @@
 package shorturl
 
 import (
-	"errors"
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 
@@ -19,15 +17,12 @@ var (
 	allowedLetters = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 )
 
-var (
-	ErrWrongRedirect = errors.New("the m.Redirect has not a valid protocol")
-)
-
 type UseCase interface {
 	Create(s *model.ShortURLRequest) error
 	Update(s *model.ShortURL) error
 	Delete(ID uuid.UUID) error
-	ByShort(s string) (model.ShortURL, error)
+	ByShort(shortURL string) (model.ShortURL, error)
+	ByShortToRedirect(s string) (model.ShortURL, error)
 	All() (model.ShortURLs, error)
 }
 
@@ -38,4 +33,16 @@ type Storage interface {
 	Delete(ID uuid.UUID) error
 	ByShort(s string) (model.ShortURL, error)
 	All() (model.ShortURLs, error)
+}
+
+type Logger interface {
+	Errorw(msg string, keysAndValues ...interface{})
+}
+
+type UseCaseHistory interface {
+	CreateWithTx(tx pgx.Tx, m *model.History) error
+}
+
+type UseCaseDB interface {
+	Tx() (pgx.Tx, error)
 }

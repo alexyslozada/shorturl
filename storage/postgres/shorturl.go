@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
@@ -119,6 +120,9 @@ func (s ShortURL) All() (model.ShortURLs, error) {
 
 func (s ShortURL) scan(row pgx.Row) (model.ShortURL, error) {
 	m := model.ShortURL{}
+
+	updatedAtNull := sql.NullInt64{}
+
 	err := row.Scan(
 		&m.ID,
 		&m.Short,
@@ -126,8 +130,10 @@ func (s ShortURL) scan(row pgx.Row) (model.ShortURL, error) {
 		&m.Description,
 		&m.Times,
 		&m.CreatedAt,
-		&m.UpdatedAt,
+		&updatedAtNull,
 	)
+
+	m.UpdatedAt = updatedAtNull.Int64
 
 	return m, err
 }

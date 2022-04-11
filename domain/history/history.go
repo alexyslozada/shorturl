@@ -22,7 +22,3 @@ type Storage interface {
 	ByShortURLIDAndDates(ID uuid.UUID, from, to int64) (model.Histories, error)
 	All() (model.Histories, error)
 }
-
-type UseCaseShortURL interface {
-	IncrementTimes(tx pgx.Tx, ID uuid.UUID) error
-}

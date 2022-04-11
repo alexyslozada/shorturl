@@ -1,6 +1,7 @@
 package history
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -10,26 +11,19 @@ import (
 )
 
 type History struct {
-	storage         Storage
-	useCaseShortURL UseCaseShortURL
+	storage Storage
 }
 
-func New(s Storage, ucs UseCaseShortURL) History {
-	return History{storage: s, useCaseShortURL: ucs}
+func New(s Storage) History {
+	return History{storage: s}
 }
 
 func (h History) CreateWithTx(tx pgx.Tx, m *model.History) error {
 	m.ID = uuid.New()
 	m.CreatedAt = time.Now().Unix()
 
-	err := h.storage.CreateWithTx(tx, m)
-	if err != nil {
-		return err
-	}
-
-	err = h.useCaseShortURL.IncrementTimes(tx, m.ShortURLID)
-	if err != nil {
-		return err
+	if err := h.storage.CreateWithTx(tx, m); err != nil {
+		return fmt.Errorf("h.storage.CreateWithTx(): %w", err)
 	}
 
 	return nil

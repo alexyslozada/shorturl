@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
@@ -87,12 +88,16 @@ func (h History) All() (model.Histories, error) {
 func (h History) scan(row pgx.Row) (model.History, error) {
 	m := model.History{}
 
+	updatedAtNull := sql.NullInt64{}
+
 	err := row.Scan(
 		&m.ID,
 		&m.ShortURLID,
 		&m.CreatedAt,
-		&m.UpdatedAt,
+		&updatedAtNull,
 	)
+
+	m.UpdatedAt = updatedAtNull.Int64
 
 	return m, err
 }
