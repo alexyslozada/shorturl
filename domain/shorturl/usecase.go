@@ -2,6 +2,7 @@ package shorturl
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,6 +22,10 @@ func New(s Storage) ShortURL {
 func (s ShortURL) Create(m *model.ShortURL, isRandom bool, short string) error {
 	m.ID = uuid.New()
 	m.CreatedAt = time.Now().Unix()
+
+	if !strings.Contains(m.RedirectTo, HTTPProtocol) {
+		return ErrWrongRedirect
+	}
 
 	if isRandom {
 		m.Short = randomPATH()
