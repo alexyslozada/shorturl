@@ -21,7 +21,7 @@ func newHandler(uc shorturl.UseCase, l *zap.SugaredLogger) handler {
 }
 
 func (h handler) Create(c echo.Context) error {
-	s := model.ShortURL{}
+	s := model.ShortURLRequest{}
 	err := c.Bind(&s)
 	if err != nil {
 		h.logger.Infow("can't bind short url", "func", "Create", "internal", err)

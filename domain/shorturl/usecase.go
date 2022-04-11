@@ -19,21 +19,24 @@ func New(s Storage) ShortURL {
 	return ShortURL{storage: s}
 }
 
-func (s ShortURL) Create(m *model.ShortURL, isRandom bool, short string) error {
+func (s ShortURL) Create(m *model.ShortURLRequest) error {
 	if !strings.Contains(m.RedirectTo, HTTPProtocol) {
 		return ErrWrongRedirect
 	}
 
-	m.ID = uuid.New()
-	m.CreatedAt = time.Now().Unix()
-
-	if isRandom {
-		m.Short = randomPATH()
-	} else {
-		m.Short = short
+	short := model.ShortURL{
+		ID:          uuid.New(),
+		Short:       m.Short,
+		RedirectTo:  m.RedirectTo,
+		Description: m.Description,
+		CreatedAt:   time.Now().Unix(),
 	}
 
-	return s.storage.Create(m)
+	if m.IsRandom {
+		m.Short = randomPATH()
+	}
+
+	return s.storage.Create(&short)
 }
 
 func (s ShortURL) Update(m *model.ShortURL) error {
