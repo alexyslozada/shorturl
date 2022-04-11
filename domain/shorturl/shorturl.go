@@ -1,8 +1,6 @@
 package shorturl
 
 import (
-	"errors"
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
 
@@ -17,10 +15,6 @@ const (
 
 var (
 	allowedLetters = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-)
-
-var (
-	ErrWrongRedirect = errors.New("the m.Redirect has not a valid protocol")
 )
 
 type UseCase interface {

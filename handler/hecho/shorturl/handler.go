@@ -1,6 +1,7 @@
 package shorturl
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -29,12 +30,15 @@ func (h handler) Create(c echo.Context) error {
 	}
 
 	err = h.useCase.Create(&s)
+	if errors.Is(err, model.ErrWrongRedirect) {
+		return c.JSON(http.StatusBadRequest, "Please verify the http or https in redirect")
+	}
 	if err != nil {
 		h.logger.Errorw("can't create short url", "func", "Create", "short_url", s, "internal", err)
 		return c.JSON(http.StatusInternalServerError, "Ups!!! can't create short url")
 	}
 
-	return c.JSON(http.StatusCreated, nil)
+	return c.JSON(http.StatusCreated, map[string]model.ShortURLRequest{"data": s})
 }
 
 func (h handler) Update(c echo.Context) error {

@@ -43,7 +43,7 @@ func (s ShortURL) hasUseCaseDB() bool {
 
 func (s ShortURL) Create(m *model.ShortURLRequest) error {
 	if !strings.Contains(m.RedirectTo, HTTPProtocol) {
-		return ErrWrongRedirect
+		return model.ErrWrongRedirect
 	}
 
 	short := model.ShortURL{
@@ -55,7 +55,8 @@ func (s ShortURL) Create(m *model.ShortURLRequest) error {
 	}
 
 	if m.IsRandom {
-		m.Short = randomPATH()
+		short.Short = randomPATH()
+		m.Short = short.Short
 	}
 
 	return s.storage.Create(&short)

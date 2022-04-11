@@ -12,8 +12,6 @@ import (
 	"github.com/alexyslozada/shorturl/model"
 )
 
-const DateFormat = "2006-01-02"
-
 type handler struct {
 	useCase history.UseCase
 	logger  *zap.SugaredLogger
@@ -70,12 +68,12 @@ func (h handler) All(c echo.Context) error {
 }
 
 func (h handler) parseFromAndToDates(from, to string) (time.Time, time.Time, error) {
-	fromDate, err := time.Parse(DateFormat, from)
+	fromDate, err := time.Parse(time.RFC3339, from)
 	if err != nil {
 		h.logger.Infow("Date `From` has a not valid format", "func", "ByShortURLID", "from", from, "internal", err)
 		return time.Time{}, time.Time{}, err
 	}
-	toDate, err := time.Parse(DateFormat, to)
+	toDate, err := time.Parse(time.RFC3339, to)
 	if err != nil {
 		h.logger.Infow("Date `To` has a not valid format", "func", "ByShortURLID", "to", to, "internal", err)
 		return time.Time{}, time.Time{}, err
