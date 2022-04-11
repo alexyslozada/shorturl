@@ -35,7 +35,11 @@ func shortURLUseCase(db *pgxpool.Pool) shorturl.ShortURL {
 func historyUseCase(db *pgxpool.Pool) history.UseCase {
 	shortURLUC := shortURLUseCase(db)
 	storage := postgres.NewHistory(db)
-	return history.New(storage, shortURLUC)
+
+	useCase := history.New(storage, shortURLUC)
+	useCase.SetUseCaseDB(dbutil.New(db))
+
+	return useCase
 }
 
 func userRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
@@ -57,6 +61,5 @@ func historyRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
 func redirectRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
 	shortURLUC := shortURLUseCase(db)
 	historyUC := historyUseCase(db)
-	dbUtilUC := dbutil.New(db)
-	routerCore.NewRouter(e, shortURLUC, historyUC, dbUtilUC, l)
+	routerCore.NewRouter(e, shortURLUC, historyUC, l)
 }
