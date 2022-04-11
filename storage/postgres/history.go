@@ -30,8 +30,8 @@ func NewHistory(db *pgxpool.Pool) History {
 	return History{db: db}
 }
 
-func (h History) CreateWithTx(tx pgx.Tx, m *model.History) error {
-	_, err := tx.Exec(
+func (h History) Create(m *model.History) error {
+	_, err := h.db.Exec(
 		context.TODO(),
 		sqlHistoryInsert,
 		m.ID,

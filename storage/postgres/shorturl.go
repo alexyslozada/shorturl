@@ -65,8 +65,8 @@ func (s ShortURL) Update(m *model.ShortURL) error {
 
 // IncrementTimes never will have a race condition b/c postgres has a `READ COMMITTED` isolation level by default.
 // @see https://www.postgresql.org/docs/current/transaction-iso.html#XACT-READ-COMMITTED
-func (s ShortURL) IncrementTimes(tx pgx.Tx, ID uuid.UUID) error {
-	_, err := tx.Exec(
+func (s ShortURL) IncrementTimes(ID uuid.UUID) error {
+	_, err := s.db.Exec(
 		context.TODO(),
 		sqlShortURLIncrement,
 		ID,

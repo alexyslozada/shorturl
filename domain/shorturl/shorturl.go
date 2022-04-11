@@ -2,7 +2,6 @@ package shorturl
 
 import (
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 
 	"github.com/alexyslozada/shorturl/model"
 )
@@ -29,7 +28,7 @@ type UseCase interface {
 type Storage interface {
 	Create(s *model.ShortURL) error
 	Update(s *model.ShortURL) error
-	IncrementTimes(tx pgx.Tx, ID uuid.UUID) error
+	IncrementTimes(ID uuid.UUID) error
 	Delete(ID uuid.UUID) error
 	ByShort(s string) (model.ShortURL, error)
 	All() (model.ShortURLs, error)
@@ -40,9 +39,5 @@ type Logger interface {
 }
 
 type UseCaseHistory interface {
-	CreateWithTx(tx pgx.Tx, m *model.History) error
-}
-
-type UseCaseDB interface {
-	Tx() (pgx.Tx, error)
+	Create(m *model.History) error
 }
