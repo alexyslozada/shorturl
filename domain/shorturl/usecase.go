@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,9 +40,19 @@ func (s ShortURL) hasUseCaseDB() bool {
 	return s.useCaseDB != nil
 }
 
-func (s ShortURL) Create(m *model.ShortURL) error {
+func New(s Storage) ShortURL {
+	return ShortURL{storage: s}
+}
+
+func (s ShortURL) Create(m *model.ShortURL, isRandom bool, short string) error {
 	m.ID = uuid.New()
 	m.CreatedAt = time.Now().Unix()
+
+	if isRandom {
+		m.Short = randomPATH()
+	} else {
+		m.Short = short
+	}
 
 	return s.storage.Create(m)
 }
@@ -134,4 +145,15 @@ func (s ShortURL) validateDependencies() error {
 	}
 
 	return nil
+}
+
+func randomPATH() string {
+	resp := make([]rune, MaxLetters)
+	lenAllowedLetters := len(allowedLetters)
+
+	for i := range resp {
+		resp[i] = allowedLetters[rand.Intn(lenAllowedLetters)]
+	}
+
+	return string(resp)
 }

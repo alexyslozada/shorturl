@@ -7,6 +7,14 @@ import (
 	"github.com/alexyslozada/shorturl/model"
 )
 
+const (
+	MaxLetters = 7
+)
+
+var (
+	allowedLetters = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+)
+
 type UseCase interface {
 	Create(s *model.ShortURL) error
 	Update(s *model.ShortURL) error
