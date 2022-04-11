@@ -6,8 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/alexyslozada/shorturl/model"
 	"github.com/google/uuid"
+
+	"github.com/alexyslozada/shorturl/model"
 )
 
 type ShortURL struct {
