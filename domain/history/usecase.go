@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/alexyslozada/shorturl/model"
-
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
+
+	"github.com/alexyslozada/shorturl/model"
 )
 
 type History struct {
