@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 
 	"github.com/alexyslozada/shorturl/model"
 )
@@ -18,12 +17,12 @@ func New(s Storage) History {
 	return History{storage: s}
 }
 
-func (h History) CreateWithTx(tx pgx.Tx, m *model.History) error {
+func (h History) Create(m *model.History) error {
 	m.ID = uuid.New()
 	m.CreatedAt = time.Now().Unix()
 
-	if err := h.storage.CreateWithTx(tx, m); err != nil {
-		return fmt.Errorf("h.storage.CreateWithTx(): %w", err)
+	if err := h.storage.Create(m); err != nil {
+		return fmt.Errorf("h.storage.Create(): %w", err)
 	}
 
 	return nil

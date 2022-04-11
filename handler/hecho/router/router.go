@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 
-	"github.com/alexyslozada/shorturl/domain/dbutil"
 	"github.com/alexyslozada/shorturl/domain/history"
 	"github.com/alexyslozada/shorturl/domain/shorturl"
 	"github.com/alexyslozada/shorturl/domain/user"
@@ -30,7 +29,6 @@ func Start(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
 func shortURLUseCase(db *pgxpool.Pool, l *zap.SugaredLogger) shorturl.ShortURL {
 	storage := postgres.NewShortURL(db)
 	useCase := shorturl.New(storage, l)
-	useCase.SetUseCaseDB(dbutil.New(db))
 	useCase.SetUseCaseHistory(history.New(postgres.NewHistory(db)))
 
 	return useCase

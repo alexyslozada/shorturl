@@ -1,15 +1,12 @@
 package shorturl
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
 
 	"github.com/alexyslozada/shorturl/model"
 )
@@ -18,7 +15,6 @@ type ShortURL struct {
 	storage        Storage
 	logger         Logger
 	useCaseHistory UseCaseHistory
-	useCaseDB      UseCaseDB
 }
 
 func New(s Storage, logger Logger) ShortURL {
@@ -31,14 +27,6 @@ func (s *ShortURL) SetUseCaseHistory(useCase UseCaseHistory) {
 
 func (s ShortURL) hasUseCaseHistory() bool {
 	return s.useCaseHistory != nil
-}
-
-func (s *ShortURL) SetUseCaseDB(useCase UseCaseDB) {
-	s.useCaseDB = useCase
-}
-
-func (s ShortURL) hasUseCaseDB() bool {
-	return s.useCaseDB != nil
 }
 
 func (s ShortURL) Create(m *model.ShortURLRequest) error {
@@ -68,10 +56,6 @@ func (s ShortURL) Update(m *model.ShortURL) error {
 	return s.storage.Update(m)
 }
 
-func (s ShortURL) IncrementTimes(tx pgx.Tx, ID uuid.UUID) error {
-	return s.storage.IncrementTimes(tx, ID)
-}
-
 func (s ShortURL) Delete(ID uuid.UUID) error {
 	return s.storage.Delete(ID)
 }
@@ -91,11 +75,7 @@ func (s ShortURL) ByShortToRedirect(shortURL string) (model.ShortURL, error) {
 		return model.ShortURL{}, fmt.Errorf("s.storage.ByShort(): %w", err)
 	}
 
-	go func() {
-		if err := s.createHistoryAndIncrementTimes(m); err != nil {
-			s.logger.Errorw("s.createHistoryAndIncrementTimes(): %v", err)
-		}
-	}()
+	go s.createHistoryAndIncrementTimes(m)
 
 	return m, nil
 }
@@ -104,49 +84,25 @@ func (s ShortURL) All() (model.ShortURLs, error) {
 	return s.storage.All()
 }
 
-func (s ShortURL) createHistoryAndIncrementTimes(shortURL model.ShortURL) error {
+func (s ShortURL) createHistoryAndIncrementTimes(shortURL model.ShortURL) {
 	if err := s.validateDependencies(); err != nil {
-		return err
+		s.logger.Errorw(fmt.Sprintf("s.validateDependencies(): %v", err))
+		return
 	}
-
-	tx, err := s.useCaseDB.Tx()
-	if err != nil {
-		return fmt.Errorf("s.useCaseDB.Tx(): %w", err)
-	}
-
-	defer func(tx pgx.Tx) {
-		if errRollback := tx.Rollback(context.TODO()); errRollback != nil {
-			if errors.Is(errRollback, pgx.ErrTxClosed) {
-				return
-			}
-
-			s.logger.Errorw("could not be rollback on tx", "internal", fmt.Errorf("tx.Rollback(): rollback error %v, %w", errRollback, err))
-		}
-	}(tx)
 
 	m := model.History{ShortURLID: shortURL.ID}
-	if err := s.useCaseHistory.CreateWithTx(tx, &m); err != nil {
-		return fmt.Errorf("h.storage.CreateWithTx(): %w", err)
+	if err := s.useCaseHistory.Create(&m); err != nil {
+		s.logger.Errorw(fmt.Sprintf("s.useCaseHistory.Create(): %v", err))
 	}
 
-	if err := s.IncrementTimes(tx, m.ShortURLID); err != nil {
-		return fmt.Errorf("h.shortURL.IncrementTimes(): %w", err)
+	if err := s.storage.IncrementTimes(m.ShortURLID); err != nil {
+		s.logger.Errorw(fmt.Sprintf("s.storage.IncrementTimes(%d): %v", m.ShortURLID, err))
 	}
-
-	if err := tx.Commit(context.TODO()); err != nil {
-		return fmt.Errorf("c.tx.Commit(): %w", err)
-	}
-
-	return nil
 }
 
 func (s ShortURL) validateDependencies() error {
 	if !s.hasUseCaseHistory() {
 		return fmt.Errorf("%w: %s", model.ErrMissingDependency, "history")
-	}
-
-	if !s.hasUseCaseDB() {
-		return fmt.Errorf("%w: %s", model.ErrMissingDependency, "db")
 	}
 
 	return nil
