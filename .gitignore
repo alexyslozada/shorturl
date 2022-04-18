@@ -12,6 +12,7 @@
 *.so
 *.dylib
 short
+short-production
 
 # Environments
 .env

@@ -17,7 +17,7 @@ var (
 )
 
 type UseCase interface {
-	Create(s *model.ShortURLRequest) error
+	Create(s *model.ShortURL) error
 	Update(s *model.ShortURL) error
 	Delete(ID uuid.UUID) error
 	ByShort(shortURL string) (model.ShortURL, error)
@@ -32,10 +32,6 @@ type Storage interface {
 	Delete(ID uuid.UUID) error
 	ByShort(s string) (model.ShortURL, error)
 	All() (model.ShortURLs, error)
-}
-
-type Logger interface {
-	Errorw(msg string, keysAndValues ...interface{})
 }
 
 type UseCaseHistory interface {

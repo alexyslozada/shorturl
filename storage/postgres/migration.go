@@ -5,6 +5,12 @@ import (
 	"fmt"
 
 	"github.com/jackc/pgx/v4/pgxpool"
+	"golang.org/x/crypto/bcrypt"
+)
+
+const (
+	InitialPassword = "secret"
+	UserID          = "e35c3d88-d5b5-4f64-81a1-275a8e560f82"
 )
 
 func Migrate(db *pgxpool.Pool) error {
@@ -26,6 +32,16 @@ func Migrate(db *pgxpool.Pool) error {
 	err = createPermission(db)
 	if err != nil {
 		return fmt.Errorf("%s %w", "permission", err)
+	}
+
+	err = insertRootUser(db)
+	if err != nil {
+		return fmt.Errorf("%s %w", "insert root user", err)
+	}
+
+	err = insertRootPermissions(db)
+	if err != nil {
+		return fmt.Errorf("%s %w", "insert root permissions", err)
 	}
 
 	return nil
@@ -105,4 +121,41 @@ func createPermission(db *pgxpool.Pool) error {
 	_, err := db.Exec(context.TODO(), sql)
 
 	return err
+}
+
+func insertRootUser(db *pgxpool.Pool) error {
+	password, err := bcrypt.GenerateFromPassword([]byte(InitialPassword), bcrypt.DefaultCost)
+	sql := `INSERT INTO ` + userTable + ` 
+		VALUES (
+			'` + UserID + `',
+			'root@root.com',
+			'` + string(password) + `', 
+			'Root user', 
+			true, 
+			extract(epoch from now()), null)
+		ON CONFLICT DO NOTHING`
+
+	_, err = db.Exec(context.TODO(), sql)
+
+	return err
+}
+
+func insertRootPermissions(db *pgxpool.Pool) error {
+	sql := `INSERT INTO permissions 
+		VALUES (
+			'2e526479-a0bf-41ca-bc12-2d3d987e00bf',
+			'` + UserID + `',
+			true,
+			true,
+			true,
+			true,
+			true,
+			extract(epoch from now()),
+			null)
+		ON CONFLICT DO NOTHING`
+
+	_, err := db.Exec(context.TODO(), sql)
+
+	return err
+
 }

@@ -22,7 +22,7 @@ func newHandler(uc shorturl.UseCase, l *zap.SugaredLogger) handler {
 }
 
 func (h handler) Create(c echo.Context) error {
-	s := model.ShortURLRequest{}
+	s := model.ShortURL{}
 	err := c.Bind(&s)
 	if err != nil {
 		h.logger.Infow("can't bind short url", "func", "Create", "internal", err)
@@ -38,7 +38,7 @@ func (h handler) Create(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, "Ups!!! can't create short url")
 	}
 
-	return c.JSON(http.StatusCreated, map[string]model.ShortURLRequest{"data": s})
+	return c.JSON(http.StatusCreated, map[string]model.ShortURL{"data": s})
 }
 
 func (h handler) Update(c echo.Context) error {

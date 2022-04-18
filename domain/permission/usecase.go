@@ -1,6 +1,8 @@
 package permission
 
 import (
+	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,4 +41,24 @@ func (p Permission) ByUserID(ID uuid.UUID) (model.Permission, error) {
 
 func (p Permission) All() (model.Permissions, error) {
 	return p.storage.All()
+}
+
+func (p Permission) HasPermission(userID uuid.UUID, method string) (bool, error) {
+	permission, err := p.ByUserID(userID)
+	if err != nil {
+		return false, fmt.Errorf("%s %w", "permission.HasPermission()", err)
+	}
+
+	switch method {
+	case http.MethodPost:
+		return permission.CanCreate, nil
+	case http.MethodGet:
+		return permission.CanSelect, nil
+	case http.MethodPut:
+		return permission.CanUpdate, nil
+	case http.MethodDelete:
+		return permission.CanDelete, nil
+	}
+
+	return false, model.ErrMethodNotAllowed
 }

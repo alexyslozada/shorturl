@@ -7,17 +7,18 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"go.uber.org/zap"
 
 	"github.com/alexyslozada/shorturl/model"
 )
 
 type ShortURL struct {
 	storage        Storage
-	logger         Logger
+	logger         *zap.SugaredLogger
 	useCaseHistory UseCaseHistory
 }
 
-func New(s Storage, logger Logger) ShortURL {
+func New(s Storage, logger *zap.SugaredLogger) ShortURL {
 	return ShortURL{storage: s, logger: logger}
 }
 
@@ -29,25 +30,19 @@ func (s ShortURL) hasUseCaseHistory() bool {
 	return s.useCaseHistory != nil
 }
 
-func (s ShortURL) Create(m *model.ShortURLRequest) error {
+func (s ShortURL) Create(m *model.ShortURL) error {
 	if !strings.Contains(m.RedirectTo, HTTPProtocol) {
 		return model.ErrWrongRedirect
 	}
 
-	short := model.ShortURL{
-		ID:          uuid.New(),
-		Short:       m.Short,
-		RedirectTo:  m.RedirectTo,
-		Description: m.Description,
-		CreatedAt:   time.Now().Unix(),
-	}
+	m.ID = uuid.New()
+	m.CreatedAt = time.Now().Unix()
 
 	if m.IsRandom {
-		short.Short = randomPATH()
-		m.Short = short.Short
+		m.Short = randomPATH()
 	}
 
-	return s.storage.Create(&short)
+	return s.storage.Create(m)
 }
 
 func (s ShortURL) Update(m *model.ShortURL) error {

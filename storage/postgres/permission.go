@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
@@ -115,6 +116,8 @@ func (p Permission) All() (model.Permissions, error) {
 
 func (p Permission) scan(row pgx.Row) (model.Permission, error) {
 	m := model.Permission{}
+	updateNull := sql.NullInt64{}
+
 	err := row.Scan(
 		&m.ID,
 		&m.UserID,
@@ -124,8 +127,9 @@ func (p Permission) scan(row pgx.Row) (model.Permission, error) {
 		&m.CanSelect,
 		&m.IsAdmin,
 		&m.CreatedAt,
-		&m.UpdatedAt,
+		&updateNull,
 	)
+	m.UpdatedAt = updateNull.Int64
 
 	return m, err
 }

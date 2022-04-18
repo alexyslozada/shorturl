@@ -12,6 +12,7 @@ type UseCase interface {
 	Delete(ID uuid.UUID) error
 	ByUserID(ID uuid.UUID) (model.Permission, error)
 	All() (model.Permissions, error)
+	HasPermission(userID uuid.UUID, method string) (bool, error)
 }
 
 type Storage interface {

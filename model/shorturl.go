@@ -4,6 +4,7 @@ import "github.com/google/uuid"
 
 type ShortURL struct {
 	ID          uuid.UUID `json:"id"`
+	IsRandom    bool      `json:"is_random"`
 	Short       string    `json:"short"`
 	RedirectTo  string    `json:"redirect_to"`
 	Description string    `json:"description"`
@@ -13,10 +14,3 @@ type ShortURL struct {
 }
 
 type ShortURLs []ShortURL
-
-type ShortURLRequest struct {
-	IsRandom    bool   `json:"is_random"`
-	Short       string `json:"short"`
-	RedirectTo  string `json:"redirect_to"`
-	Description string `json:"description"`
-}

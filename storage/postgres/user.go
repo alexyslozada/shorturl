@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4"
@@ -89,6 +90,8 @@ func (u User) All() (model.Users, error) {
 
 func (u User) scan(row pgx.Row) (model.User, error) {
 	m := model.User{}
+	updateNull := sql.NullInt64{}
+
 	err := row.Scan(
 		&m.ID,
 		&m.Email,
@@ -96,8 +99,9 @@ func (u User) scan(row pgx.Row) (model.User, error) {
 		&m.FullName,
 		&m.Active,
 		&m.CreatedAt,
-		&m.UpdatedAt,
+		&updateNull,
 	)
+	m.UpdatedAt = updateNull.Int64
 
 	return m, err
 }
