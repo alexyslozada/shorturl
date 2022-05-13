@@ -134,6 +134,9 @@ func insertRootUser(db *pgxpool.Pool) error {
 			true, 
 			extract(epoch from now()), null)
 		ON CONFLICT DO NOTHING`
+	if err != nil {
+		return err
+	}
 
 	_, err = db.Exec(context.TODO(), sql)
 
