@@ -72,7 +72,7 @@ func (h handler) Delete(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Ups! can't delete short url"})
 	}
 
-	return c.JSON(http.StatusNoContent, nil)
+	return c.NoContent(http.StatusNoContent)
 }
 
 func (h handler) ByShort(c echo.Context) error {

@@ -68,8 +68,12 @@ func (m Middleware) ValidatePermission(next echo.HandlerFunc) echo.HandlerFunc {
 
 func (m Middleware) authToken(header http.Header) (jwt.MapClaims, error) {
 	tokenRequest := header.Get("Authorization")
+	if len(tokenRequest) == 0 {
+		return nil, fmt.Errorf("the auth token is empty")
+	}
+
 	if strings.Contains(tokenRequest, "Bearer ") {
-		tokenRequest = tokenRequest[6:]
+		tokenRequest = tokenRequest[7:]
 	}
 
 	token, err := jwt.Parse(tokenRequest, func(token *jwt.Token) (interface{}, error) {
