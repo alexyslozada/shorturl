@@ -8,11 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"go.uber.org/zap"
 
 	"github.com/alexyslozada/shorturl/handler/hecho/router"
 	"github.com/alexyslozada/shorturl/storage/postgres"
@@ -57,6 +58,7 @@ func loadEnv() {
 
 func getEcho() *echo.Echo {
 	e := echo.New()
+	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.Logger())
 	e.Use(middleware.CORS())
 
