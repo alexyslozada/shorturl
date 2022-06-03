@@ -1,9 +1,10 @@
 package router
 
 import (
+	"go.uber.org/zap"
+
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
-	"go.uber.org/zap"
 
 	"github.com/alexyslozada/shorturl/domain/history"
 	"github.com/alexyslozada/shorturl/domain/login"
@@ -20,17 +21,17 @@ import (
 )
 
 func Start(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
+	middlewarePermission := middlewareUseCase(db, l)
 	// H
-	historyRouter(e, db, l)
+	historyRouter(e, db, l, middlewarePermission)
 	// L
 	loginRouter(e, db, l)
 	// R
 	redirectRouter(e, db, l)
 	// S
-	middlewarePermission := middlewareUseCase(db, l)
 	shortURLRouter(e, db, l, middlewarePermission)
 	// U
-	userRouter(e, db, l)
+	userRouter(e, db, l, middlewarePermission)
 }
 
 func shortURLUseCase(db *pgxpool.Pool, l *zap.SugaredLogger) shorturl.ShortURL {
@@ -48,10 +49,10 @@ func historyUseCase(db *pgxpool.Pool) history.UseCase {
 	return useCase
 }
 
-func userRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
+func userRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger, middlewareFunc middleware.UseCase) {
 	storage := postgres.NewUser(db)
 	useCase := user.New(storage)
-	routerUser.NewRouter(e, useCase, l)
+	routerUser.NewRouter(e, useCase, l, middlewareFunc)
 }
 
 func shortURLRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger, middlewareUseCase middleware.UseCase) {
@@ -59,9 +60,9 @@ func shortURLRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger, middle
 	routerShortURL.NewRouter(e, useCase, l, middlewareUseCase)
 }
 
-func historyRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
+func historyRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger, middlewareUseCase middleware.UseCase) {
 	useCase := historyUseCase(db)
-	routerHistory.NewRouter(e, useCase, l)
+	routerHistory.NewRouter(e, useCase, l, middlewareUseCase)
 }
 
 func redirectRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
