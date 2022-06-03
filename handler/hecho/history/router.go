@@ -3,8 +3,9 @@ package history
 import (
 	"go.uber.org/zap"
 
-	"github.com/alexyslozada/shorturl/handler/hecho/middleware"
 	"github.com/labstack/echo/v4"
+
+	"github.com/alexyslozada/shorturl/handler/hecho/middleware"
 
 	"github.com/alexyslozada/shorturl/domain/history"
 )
