@@ -1,6 +1,8 @@
 package router
 
 import (
+	"os"
+
 	"go.uber.org/zap"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -21,11 +23,17 @@ import (
 )
 
 func Start(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
-	middlewarePermission := middlewareUseCase(db, l)
+	// TODO change this to a cert .pem
+	secretKey := os.Getenv("JWT_SECRET_KEY")
+	if len(secretKey) == 0 {
+		panic("The JWT_SECRET_KEY env var must be set")
+	}
+
+	middlewarePermission := middlewareUseCase(db, l, secretKey)
 	// H
 	historyRouter(e, db, l, middlewarePermission)
 	// L
-	loginRouter(e, db, l)
+	loginRouter(e, db, l, secretKey)
 	// R
 	redirectRouter(e, db, l)
 	// S
@@ -71,14 +79,14 @@ func redirectRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
 	routerCore.NewRouter(e, shortURLUC, historyUC, l)
 }
 
-func loginRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger) {
+func loginRouter(e *echo.Echo, db *pgxpool.Pool, l *zap.SugaredLogger, secretKey string) {
 	storage := postgres.NewUser(db)
-	useCase := login.New(storage)
+	useCase := login.New(storage, secretKey)
 	routerLogin.NewRouter(e, useCase, l)
 }
 
-func middlewareUseCase(db *pgxpool.Pool, l *zap.SugaredLogger) middleware.UseCase {
+func middlewareUseCase(db *pgxpool.Pool, l *zap.SugaredLogger, secretKey string) middleware.UseCase {
 	storage := postgres.NewPermission(db)
 	useCase := permission.New(storage)
-	return middleware.New(useCase, l)
+	return middleware.New(useCase, l, secretKey)
 }

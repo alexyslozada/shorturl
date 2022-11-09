@@ -11,11 +11,12 @@ import (
 )
 
 type Login struct {
-	storage Storage
+	storage   Storage
+	secretKey string
 }
 
-func New(s Storage) Login {
-	return Login{storage: s}
+func New(s Storage, sk string) Login {
+	return Login{storage: s, secretKey: sk}
 }
 
 func (l Login) Login(email, password string) (string, error) {
@@ -45,7 +46,8 @@ func (l Login) Login(email, password string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Generate encoded token and send it as response.
-	t, err := token.SignedString([]byte(model.Secret))
+	// TODO replace this secret key with a cert .pem
+	t, err := token.SignedString([]byte(l.secretKey))
 	if err != nil {
 		return "", fmt.Errorf("login.Login() %w", err)
 	}

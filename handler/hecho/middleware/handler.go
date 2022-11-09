@@ -18,10 +18,11 @@ import (
 type Middleware struct {
 	useCasePermission permission.UseCase
 	logger            *zap.SugaredLogger
+	secretKey         string
 }
 
-func New(uc permission.UseCase, l *zap.SugaredLogger) Middleware {
-	return Middleware{useCasePermission: uc, logger: l}
+func New(uc permission.UseCase, l *zap.SugaredLogger, sk string) Middleware {
+	return Middleware{useCasePermission: uc, logger: l, secretKey: sk}
 }
 
 func (m *Middleware) SetPermission(uc permission.UseCase) {
@@ -83,7 +84,7 @@ func (m Middleware) authToken(header http.Header) (jwt.MapClaims, error) {
 		}
 
 		// TODO implements a .pem cert file rather than model.Secret
-		return []byte(model.Secret), nil
+		return []byte(m.secretKey), nil
 	})
 	if err != nil {
 		m.logger.Errorw("couldn't parse token", "func", "jwt.Parse", "internal", err)
