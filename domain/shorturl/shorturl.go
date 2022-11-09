@@ -22,7 +22,7 @@ type UseCase interface {
 	Delete(ID uuid.UUID) error
 	ByShort(shortURL string) (model.ShortURL, error)
 	ByShortToRedirect(s string) (model.ShortURL, error)
-	All() (model.ShortURLs, error)
+	All(limit, offset int) (model.ShortURLs, error)
 }
 
 type Storage interface {
@@ -31,7 +31,7 @@ type Storage interface {
 	IncrementTimes(ID uuid.UUID) error
 	Delete(ID uuid.UUID) error
 	ByShort(s string) (model.ShortURL, error)
-	All() (model.ShortURLs, error)
+	All(limit, offset int) (model.ShortURLs, error)
 }
 
 type UseCaseHistory interface {

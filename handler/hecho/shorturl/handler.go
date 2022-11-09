@@ -3,6 +3,7 @@ package shorturl
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -87,7 +88,17 @@ func (h handler) ByShort(c echo.Context) error {
 }
 
 func (h handler) All(c echo.Context) error {
-	ss, err := h.useCase.All()
+	limit, err := strconv.Atoi(c.QueryParam("limit"))
+	if err != nil {
+		limit = 20
+	}
+	pag, err := strconv.Atoi(c.QueryParam("pag"))
+	if err != nil {
+		pag = 1
+	}
+
+	offset := limit*pag - limit
+	ss, err := h.useCase.All(limit, offset)
 	if err != nil {
 		h.logger.Errorw("can't get short urls", "func", "All", "internal", err)
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Ups! can't get short urls"})

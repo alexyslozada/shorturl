@@ -75,8 +75,8 @@ func (s ShortURL) ByShortToRedirect(shortURL string) (model.ShortURL, error) {
 	return m, nil
 }
 
-func (s ShortURL) All() (model.ShortURLs, error) {
-	return s.storage.All()
+func (s ShortURL) All(limit, offset int) (model.ShortURLs, error) {
+	return s.storage.All(limit, offset)
 }
 
 func (s ShortURL) createHistoryAndIncrementTimes(shortURL model.ShortURL) {
