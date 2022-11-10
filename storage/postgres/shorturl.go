@@ -23,7 +23,8 @@ const (
 				WHERE id = $5`
 	sqlShortURLIncrement    = `UPDATE ` + shortURLTable + ` SET times = times + 1 WHERE id = $1`
 	sqlShortURLDelete       = `DELETE FROM ` + shortURLTable + ` WHERE id = $1`
-	sqlShortURLQuery        = `SELECT id, short, redirect_to, description, times, created_at, updated_at FROM ` + shortURLTable + ` ORDER BY created_at DESC LIMIT $1 OFFSET $2`
+	sqlShortURLQuery        = `SELECT id, short, redirect_to, description, times, created_at, updated_at FROM ` + shortURLTable
+	sqlGetAll               = sqlShortURLQuery + ` ORDER BY created_at DESC LIMIT $1 OFFSET $2`
 	sqlShortURLQueryByShort = sqlShortURLQuery + ` WHERE short = $1`
 )
 
@@ -98,7 +99,7 @@ func (s ShortURL) ByShort(short string) (model.ShortURL, error) {
 func (s ShortURL) All(limit, offset int) (model.ShortURLs, error) {
 	rows, err := s.db.Query(
 		context.TODO(),
-		sqlShortURLQuery,
+		sqlGetAll,
 		limit,
 		offset,
 	)
