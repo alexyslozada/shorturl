@@ -37,3 +37,7 @@ type Storage interface {
 type UseCaseHistory interface {
 	Create(m *model.History) error
 }
+
+type UseCaseSheets interface {
+	AddRow(short *model.ShortURL, createdAt int64, spreadsheetID string) error
+}

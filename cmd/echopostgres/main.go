@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/alexyslozada/shorturl/model"
+
 	"go.uber.org/zap"
 
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -35,24 +37,28 @@ func main() {
 
 	err := postgres.Migrate(dbPool)
 	if err != nil {
-		log.Println("Error: couldn't migrate database", err)
-		os.Exit(1)
+		log.Fatalln("Error: couldn't migrate database", err)
 	}
 
-	router.Start(e, dbPool, logger.Sugar())
+	// TODO change this to a cert .pem
+	secretKey := os.Getenv("JWT_SECRET_KEY")
+	if len(secretKey) == 0 {
+		panic("The JWT_SECRET_KEY env var must be set")
+	}
+
+	sheetsConf := getSheetsConfig()
+	router.Start(e, dbPool, secretKey, sheetsConf, logger.Sugar())
 
 	err = e.Start(":" + os.Getenv("HTTP_PORT"))
 	if err != nil {
-		log.Println("Error: Couldn't start the server", err)
-		os.Exit(1)
+		log.Fatalln("Error: Couldn't start the server", err)
 	}
 }
 
 func loadEnv() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file", err)
-		os.Exit(1)
+		log.Fatalln("Error loading .env file", err)
 	}
 }
 
@@ -100,8 +106,7 @@ func getPostgres() *pgxpool.Pool {
 		int32(max),
 	)
 	if err != nil {
-		log.Println("Can't connect to postgres db", err)
-		os.Exit(1)
+		log.Fatalln("Can't connect to postgres db", err)
 	}
 
 	return db
@@ -110,8 +115,7 @@ func getPostgres() *pgxpool.Pool {
 func getLog() *zap.Logger {
 	logger, err := zap.NewProduction()
 	if err != nil {
-		log.Println("Error: Couldn't create the logger", err)
-		os.Exit(1)
+		log.Fatalln("Error: Couldn't create the logger", err)
 	}
 
 	return logger
@@ -119,4 +123,36 @@ func getLog() *zap.Logger {
 
 func health(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]time.Time{"data": time.Now()})
+}
+
+func getSheetsConfig() model.Sheets {
+	willStore := os.Getenv("SHEETS_HAS_TO_STORE")
+	if willStore == "" {
+		return model.Sheets{}
+	}
+
+	hasToStore, err := strconv.ParseBool(willStore)
+	if err != nil {
+		log.Printf("[WARN] the %s is not a valid boolean value, will continue without store in google sheets", willStore)
+		return model.Sheets{}
+	}
+
+	m := model.Sheets{
+		HasToReportToSheets: hasToStore,
+	}
+
+	m.ConfigFile = os.Getenv("SHEETS_CONFIGURATION")
+	if m.ConfigFile == "" {
+		log.Fatalln("[ERROR] config file is mandatory")
+	}
+	m.SpreadsheetID = os.Getenv("SHEETS_SPREADSHEET_ID")
+	if m.SpreadsheetID == "" {
+		log.Fatalln("[ERROR] spreadsheet ID is mandatory")
+	}
+	m.SpreadsheetSheet = os.Getenv("SHEETS_SPREADSHEET_SHEET")
+	if m.SpreadsheetSheet == "" {
+		log.Fatalln("[ERROR] spreadsheet sheet is mandatory")
+	}
+
+	return m
 }

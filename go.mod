@@ -9,5 +9,6 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo/v4 v4.7.2
 	go.uber.org/zap v1.21.0
-	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5
+	golang.org/x/crypto v0.11.0
+	google.golang.org/api v0.130.0
 )

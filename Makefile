@@ -32,7 +32,7 @@ install-linter:
 linter:
 	echo "$(ccyellow)Executing linter...$(ccend)"
 	golangci-lint run
-	echo "$(ccyellow)Linter finished!$(ccend)"
+	echo "$(ccgreen)Linter finished!$(ccend)"
 
 build:
 	echo "$(ccyellow)Building app...$(ccend)"
