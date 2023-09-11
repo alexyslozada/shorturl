@@ -32,7 +32,7 @@ func New(cf string, logger *zap.SugaredLogger) (Sheets, error) {
 func (s Sheets) AddRow(short *model.ShortURL, createdAt int64, spreadsheetID string) error {
 	sheetRange := "datos!A:A"
 
-	lastRow, err := getLastRow(s.service, spreadsheetID, sheetRange)
+	lastRow, err := getLastRow(s.service, spreadsheetID)
 	if err != nil {
 		s.logger.Errorw(fmt.Sprintf("Error getting last row, error was: %v", err))
 		return err
@@ -81,12 +81,19 @@ func createSheetsClient(credentialsFile string) (*sheets.Service, error) {
 	return client, nil
 }
 
-func getLastRow(client *sheets.Service, spreadsheetID, sheetRange string) (int64, error) {
-	resp, err := client.Spreadsheets.Values.Get(spreadsheetID, sheetRange).Do()
+func getLastRow(client *sheets.Service, spreadsheetID string) (int64, error) {
+	resp, err := client.Spreadsheets.Get(spreadsheetID).Do()
 	if err != nil {
 		return 0, fmt.Errorf("failed to get values: %v", err)
 	}
 
-	lastRow := int64(len(resp.Values))
-	return lastRow, nil
+	if len(resp.Sheets) == 0 {
+		return 0, fmt.Errorf("cannot get sheets from spreadsheetID %d, error: there are not sheets", spreadsheetID)
+	}
+
+	sheetsPropeties := resp.Sheets[0].Properties
+	rowCount := sheetsPropeties.GridProperties.RowCount
+	rowCount++
+
+	return rowCount, nil
 }
