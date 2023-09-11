@@ -30,15 +30,13 @@ func New(cf string, logger *zap.SugaredLogger) (Sheets, error) {
 }
 
 func (s Sheets) AddRow(short *model.ShortURL, createdAt int64, spreadsheetID string) error {
-	sheetRange := "datos!A:A"
-
 	lastRow, err := getLastRow(s.service, spreadsheetID)
 	if err != nil {
 		s.logger.Errorw(fmt.Sprintf("Error getting last row, error was: %v", err))
 		return err
 	}
 
-	sheetRange = fmt.Sprintf("datos!A%d:J%d", lastRow, lastRow)
+	sheetRange := fmt.Sprintf("datos!A%d:J%d", lastRow, lastRow)
 
 	createdTime := time.Unix(createdAt, 0)
 
@@ -88,7 +86,7 @@ func getLastRow(client *sheets.Service, spreadsheetID string) (int64, error) {
 	}
 
 	if len(resp.Sheets) == 0 {
-		return 0, fmt.Errorf("cannot get sheets from spreadsheetID %d, error: there are not sheets", spreadsheetID)
+		return 0, fmt.Errorf("cannot get sheets from spreadsheetID %s, error: there are not sheets", spreadsheetID)
 	}
 
 	sheetsPropeties := resp.Sheets[0].Properties
