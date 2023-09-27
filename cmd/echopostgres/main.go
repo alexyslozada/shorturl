@@ -56,7 +56,11 @@ func main() {
 }
 
 func loadEnv() {
-	err := godotenv.Load()
+	configFilePath := os.Getenv("CONFIG_FILE_PATH")
+	if configFilePath == "" {
+		configFilePath = ".env"
+	}
+	err := godotenv.Load(configFilePath)
 	if err != nil {
 		log.Fatalln("Error loading .env file", err)
 	}
